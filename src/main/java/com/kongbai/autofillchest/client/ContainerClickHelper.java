@@ -12,6 +12,7 @@
  */
 package com.kongbai.autofillchest.client;
 
+import com.kongbai.autofillchest.AutoFillChest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
@@ -59,7 +60,11 @@ public final class ContainerClickHelper {
         if (player == null || mc.gameMode == null) {
             return InteractionResult.FAIL;
         }
-        return mc.gameMode.useItemOn(player, hand, blockHit);
+        InteractionResult result = mc.gameMode.useItemOn(player, hand, blockHit);
+        // 打不开时把结果写进日志，方便定位
+        AutoFillChest.LOGGER.info("[AutoFillChest] 右键开箱 hand={} pos={} result={}",
+                hand, blockHit.getBlockPos(), result);
+        return result;
     }
 
     /** 关闭当前界面（会发关闭容器包，服务端同步）。 */

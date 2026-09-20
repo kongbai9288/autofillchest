@@ -1,7 +1,6 @@
 {
   "key.category.autofillchest.category": "Auto Fill Chest",
   "key.autofillchest.fill": "Fill Chest From Inventory",
-
   "message.autofillchest.no_target": "Not looking at a chest",
   "message.autofillchest.need_empty_hand": "Free a hand first (you are holding a block)",
   "message.autofillchest.open_failed": "Could not open that chest",
@@ -9,5 +8,6 @@
   "message.autofillchest.started": "Filling chest...",
   "message.autofillchest.chest_full": "Chest full: %1$d / %2$d slots used",
   "message.autofillchest.inventory_empty": "Inventory empty: %1$d / %2$d slots used",
-  "message.autofillchest.done": "Done: %1$d / %2$d slots used"
+  "message.autofillchest.done": "Done: %1$d / %2$d slots used",
+  "message.autofillchest.open_manual": "Could not auto-open: open the chest manually, then press H"
 }

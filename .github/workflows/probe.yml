@@ -1,0 +1,60 @@
+name: Probe 26.2 API
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 25
+      - name: 准备 Gradle 9.7.0
+        run: |
+          curl -sSL -o /tmp/gradle.zip https://services.gradle.org/distributions/gradle-9.7.0-bin.zip
+          mkdir -p "$RUNNER_TEMP/gdist"
+          unzip -q /tmp/gradle.zip -d "$RUNNER_TEMP/gdist"
+          echo "$RUNNER_TEMP/gdist/gradle-9.7.0/bin" >> $GITHUB_PATH
+      - name: 预热 Loom（下载 Minecraft）
+        continue-on-error: true
+        run: gradle help --no-daemon 2>&1 | tail -3
+      - name: 探测 26.2 开箱相关 API
+        run: |
+          mkdir -p logs
+          {
+            MCJAR=$(find "$HOME/.gradle/caches/fabric-loom" -name "minecraft-merged-deobf-26.2.jar" | head -1)
+            [ -z "$MCJAR" ] && MCJAR=$(find "$HOME/.gradle/caches/fabric-loom" -name "*client*.jar" | head -1)
+            echo "MCJAR=$MCJAR"
+            echo "=========== MultiPlayerGameMode 全部方法 ==========="
+            javap -p -cp "$MCJAR" net.minecraft.client.multiplayer.MultiPlayerGameMode
+            echo "=========== useItemOn 字节码 ==========="
+            javap -p -c -cp "$MCJAR" net.minecraft.client.multiplayer.MultiPlayerGameMode 2>/dev/null \
+              | grep -A 90 "useItemOn(net" | head -100
+            echo "=========== ServerboundUseItemOnPacket ==========="
+            javap -p -cp "$MCJAR" net.minecraft.network.protocol.game.ServerboundUseItemOnPacket 2>/dev/null
+            echo "=========== ChestBlock ==========="
+            javap -p -cp "$MCJAR" net.minecraft.world.level.block.ChestBlock 2>/dev/null | grep -iE "block|use|open|menu"
+            echo "=========== LocalPlayer ==========="
+            javap -cp "$MCJAR" net.minecraft.client.player.LocalPlayer 2>/dev/null | grep -iE "pick|swing|connection|containerMenu"
+            echo "=========== ClientPacketListener send ==========="
+            javap -cp "$MCJAR" net.minecraft.client.multiplayer.ClientPacketListener 2>/dev/null | grep -iE " public .*send|Packet send"
+            echo "=========== Entity.pick ==========="
+            javap -cp "$MCJAR" net.minecraft.world.entity.Entity 2>/dev/null | grep -iE "pick\("
+          } 2>&1 | tee logs/probe.log
+      - name: 提交探测日志
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A logs/
+          if git diff --staged --quiet; then
+            echo "无变化"
+          else
+            git commit -m "probe: 26.2 API dump"
+            git push
+          fi

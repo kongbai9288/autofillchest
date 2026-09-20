@@ -18,7 +18,7 @@ public final class AutoFillConfig {
     public static final int MAX_FILL_TICKS = 200;
 
     /** 发出"打开箱子"后，等待界面出现的上限（tick）。 */
-    public static final int OPEN_TIMEOUT_TICKS = 20;
+    public static final int OPEN_TIMEOUT_TICKS = 60;
 
     /** 背包最多扫几轮。一轮 = 把 36 个背包槽各点一次。 */
     public static final int MAX_ROUNDS = 3;

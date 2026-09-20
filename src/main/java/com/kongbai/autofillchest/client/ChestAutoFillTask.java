@@ -26,11 +26,13 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.List;
 
@@ -64,6 +66,7 @@ public final class ChestAutoFillTask {
     private int cursor;
     private int rounds;
     private boolean movedThisRound;
+    private int openRetries;
 
     private ChestAutoFillTask() {
     }
@@ -113,6 +116,7 @@ public final class ChestAutoFillTask {
         ContainerClickHelper.useItemOn(mc, hand, target.getHit());
         state = State.WAITING_OPEN;
         ticks = 0;
+        openRetries = 0;
     }
 
     /** 每 tick 推进状态机。 */
@@ -127,8 +131,20 @@ public final class ChestAutoFillTask {
                 startFilling(mc);
                 return;
             }
+            // 中途补一次右键：低端设备 / 低 TPS 下第一次可能来不及生效
+            if (ticks == 30 && openRetries < 2) {
+                openRetries++;
+                InteractionHand retryHand = pickSafeHand(mc);
+                if (retryHand == null) {
+                    retryHand = InteractionHand.MAIN_HAND;
+                }
+                if (mc.hitResult instanceof BlockHitResult bhr && bhr.getBlockPos().equals(targetPos)) {
+                    ContainerClickHelper.useItemOn(mc, retryHand, bhr);
+                }
+            }
             if (ticks > AutoFillConfig.OPEN_TIMEOUT_TICKS) {
-                Feedback.send(mc, "message.autofillchest.open_failed");
+                AutoFillChest.LOGGER.warn("[AutoFillChest] 自动开箱超时，目标 {} 仍未出现容器界面", targetPos);
+                Feedback.send(mc, "message.autofillchest.open_manual");
                 reset();
             }
             return;
@@ -244,6 +260,13 @@ public final class ChestAutoFillTask {
         if (player.getOffhandItem().isEmpty()) {
             return InteractionHand.OFF_HAND;
         }
+        // 两只手都有东西时：只要不是方块，右键仍然只是开箱而不会把方块放下去
+        if (!(player.getMainHandItem().getItem() instanceof BlockItem)) {
+            return InteractionHand.MAIN_HAND;
+        }
+        if (!(player.getOffhandItem().getItem() instanceof BlockItem)) {
+            return InteractionHand.OFF_HAND;
+        }
         return null;
     }
 
@@ -318,6 +341,7 @@ public final class ChestAutoFillTask {
         state = State.IDLE;
         targetPos = null;
         ticks = 0;
+        openRetries = 0;
         cursor = 0;
         rounds = 0;
         movedThisRound = false;
