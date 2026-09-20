@@ -26,7 +26,12 @@ public final class Feedback {
         if (player == null) {
             return;
         }
-        // displayClientMessage(Component, boolean actionBar)
-        player.displayClientMessage(message, AutoFillConfig.FEEDBACK_ACTION_BAR);
+        // 26.2 没有 displayClientMessage：聊天栏用 sendSystemMessage，
+        // 快捷栏上方的 overlay 用 sendOverlayMessage。
+        if (AutoFillConfig.FEEDBACK_ACTION_BAR) {
+            player.sendOverlayMessage(message);
+        } else {
+            player.sendSystemMessage(message);
+        }
     }
 }

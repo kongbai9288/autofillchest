@@ -41,6 +41,9 @@ public final class ChestAutoFillTask {
     /** 背包在任何容器界面里都固定占最后 36 格（27 主背包 + 9 快捷栏）。 */
     private static final int PLAYER_SLOT_COUNT = 36;
 
+    /** 玩家自己背包界面（InventoryMenu）的槽位数，用来判断"有没有打开容器"。 */
+    private static final int PLAYER_INVENTORY_MENU_SLOTS = 46;
+
     private enum State {
         IDLE,
         WAITING_OPEN,
@@ -203,13 +206,16 @@ public final class ChestAutoFillTask {
 
     /**
      * 当前是否打开着一个"容器界面"。
-     * 判定：有界面 + 槽位数 > 46（玩家自己的背包是 46 格；
-     * 单箱 27+36=63，大箱 54+36=90，木桶 / 潜影盒同样是 63）。
-     * 这样不依赖具体 Screen / Menu 类名，兼容性更好。
+     *
+     * 26.2 的 Minecraft 没有 public 的 screen 字段（也没有 getScreen()），
+     * 所以改用容器槽位数判断：玩家自己的背包界面固定 46 格，
+     * 打开容器后变成 27+36=63（单箱 / 木桶 / 潜影盒）或 54+36=90（大箱）。
+     * 不依赖具体 Screen / Menu 类名，兼容性更好。
      */
     private boolean isContainerScreenOpen(Minecraft mc) {
         LocalPlayer player = mc.player;
-        return mc.screen != null && player != null && player.containerMenu.slots.size() > 46;
+        return player != null && player.containerMenu != null
+                && player.containerMenu.slots.size() > PLAYER_INVENTORY_MENU_SLOTS;
     }
 
     /**
