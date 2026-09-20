@@ -3,13 +3,12 @@
   "id": "autofillchest",
   "version": "${version}",
   "name": "Auto Fill Chest",
-  "description": "按 H 键把玩家背包物品自动塞进准星指向的箱子，直到箱子装满。客户端处理按键，服务端执行物品移动。",
+  "description": "按 H 键，把背包里的物品一键塞满你正在看的箱子（纯客户端，服务端无需安装）",
   "authors": ["kongbai9288"],
   "contact": {},
   "license": "MIT",
-  "environment": "*",
+  "environment": "client",
   "entrypoints": {
-    "main": ["com.kongbai.autofillchest.AutoFillChestMod"],
     "client": ["com.kongbai.autofillchest.client.AutoFillChestClient"]
   },
   "depends": {
