@@ -8,10 +8,10 @@ Fabric Loom: 1.18.2
 > Task :processResources
 > Task :classes
 > Task :processIncludeJars
-> Task :compileTestJava NO-SOURCE
 > Task :jar
-> Task :processTestResources NO-SOURCE
+> Task :compileTestJava NO-SOURCE
 > Task :assemble
+> Task :processTestResources NO-SOURCE
 > Task :testClasses UP-TO-DATE
 > Task :test NO-SOURCE
 > Task :validateAccessWidener NO-SOURCE
