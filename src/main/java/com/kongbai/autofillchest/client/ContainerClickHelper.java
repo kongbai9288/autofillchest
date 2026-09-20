@@ -15,6 +15,7 @@ package com.kongbai.autofillchest.client;
 import com.kongbai.autofillchest.AutoFillChest;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.ContainerInput;
@@ -32,7 +33,9 @@ public final class ContainerClickHelper {
      *   1) 先补满目标容器里"同种物品且未满堆叠"的格子
      *   2) 没有同种物品才占用第一个空格子
      *   3) 放不下的部分留在背包
-     * 所以不需要自己写搬物品逻辑，也不会出现 desync。
+     *
+     * 注意：调用方必须保证一 tick 只调用一次，否则同帧多个包的 stateId 相同，
+     * 服务端只接受第一个、丢弃其余。
      *
      * @param slotIndex 槽位在 menu.slots 中的下标（点击包用的就是下标）
      */
@@ -51,20 +54,34 @@ public final class ContainerClickHelper {
         return true;
     }
 
-    /**
-     * 模拟玩家右键方块（用来把箱子界面打开）。
-     * TODO: 确认 26.2 API 名称：useItemOn(LocalPlayer, InteractionHand, BlockHitResult)
-     */
+    /** 标准右键开箱（走 prediction，最贴近真人操作）。 */
     public static InteractionResult useItemOn(Minecraft mc, InteractionHand hand, BlockHitResult blockHit) {
         LocalPlayer player = mc.player;
         if (player == null || mc.gameMode == null) {
             return InteractionResult.FAIL;
         }
         InteractionResult result = mc.gameMode.useItemOn(player, hand, blockHit);
-        // 打不开时把结果写进日志，方便定位
         AutoFillChest.LOGGER.info("[AutoFillChest] 右键开箱 hand={} pos={} result={}",
                 hand, blockHit.getBlockPos(), result);
         return result;
+    }
+
+    /**
+     * 直接发右键方块包（不走 prediction），作为标准路径失败时的兜底。
+     * TODO: 确认 26.2 API 名称：若 ClientPacketListener 没有可访问的 send(Packet)，
+     *       删掉本方法以及 ChestAutoFillTask 里对它的调用即可（功能退化为只用标准路径）。
+     */
+    public static void sendUseItemOn(Minecraft mc, InteractionHand hand, BlockHitResult blockHit) {
+        LocalPlayer player = mc.player;
+        if (player == null || player.connection == null) {
+            return;
+        }
+        try {
+            player.connection.send(new ServerboundUseItemOnPacket(hand, blockHit, 0));
+            AutoFillChest.LOGGER.info("[AutoFillChest] 兜底直发右键包 hand={} pos={}", hand, blockHit.getBlockPos());
+        } catch (Exception e) {
+            AutoFillChest.LOGGER.warn("[AutoFillChest] 兜底发包失败：{}", e.toString());
+        }
     }
 
     /** 关闭当前界面（会发关闭容器包，服务端同步）。 */

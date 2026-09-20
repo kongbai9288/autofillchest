@@ -9,19 +9,13 @@ public final class AutoFillConfig {
     public static final double MAX_REACH = 4.5D;
 
     /**
-     * 每 tick 最多发多少个 QUICK_MOVE 点击包。
-     * 目的是模拟真人操作速度，避免一帧内狂发几十个包。
+     * 填充阶段的安全上限（tick），超时自动结束，防止状态机卡死。
+     * 30 秒足够把 36 个背包槽都点一遍（一 tick 一包）。
      */
-    public static final int CLICKS_PER_TICK = 3;
+    public static final int MAX_FILL_TICKS = 600;
 
-    /** 填充阶段的安全上限（tick），超时自动结束，防止状态机卡死。 */
-    public static final int MAX_FILL_TICKS = 200;
-
-    /** 发出"打开箱子"后，等待界面出现的上限（tick）。 */
+    /** 发出"打开箱子"后，等待界面出现的上限（tick）。移动端给足 3 秒。 */
     public static final int OPEN_TIMEOUT_TICKS = 60;
-
-    /** 背包最多扫几轮。一轮 = 把 36 个背包槽各点一次。 */
-    public static final int MAX_ROUNDS = 3;
 
     /** 填充完成后是否自动关闭箱子界面。 */
     public static final boolean AUTO_CLOSE_AFTER_FILL = false;
