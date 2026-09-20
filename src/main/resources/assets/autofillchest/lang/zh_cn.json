@@ -1,0 +1,13 @@
+{
+  "key.category.autofillchest.category": "自动填充箱子",
+  "key.autofillchest.fill": "把背包物品塞进箱子",
+
+  "message.autofillchest.no_target": "没有对准箱子",
+  "message.autofillchest.need_empty_hand": "请先空出一只手（你手上拿着方块）",
+  "message.autofillchest.open_failed": "打不开这个箱子",
+  "message.autofillchest.mismatch": "当前打开的界面不是你正在看的箱子",
+  "message.autofillchest.started": "正在填充箱子…",
+  "message.autofillchest.chest_full": "箱子已满：已占用 %1$d / %2$d 格",
+  "message.autofillchest.inventory_empty": "背包已空：已占用 %1$d / %2$d 格",
+  "message.autofillchest.done": "填充完成：已占用 %1$d / %2$d 格"
+}

@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "autofillchest",
+  "version": "${version}",
+  "name": "Auto Fill Chest",
+  "description": "按 H 键把玩家背包物品自动塞进准星指向的箱子，直到箱子装满。客户端处理按键，服务端执行物品移动。",
+  "authors": ["kongbai9288"],
+  "contact": {},
+  "license": "MIT",
+  "environment": "*",
+  "entrypoints": {
+    "main": ["com.kongbai.autofillchest.AutoFillChestMod"],
+    "client": ["com.kongbai.autofillchest.client.AutoFillChestClient"]
+  },
+  "depends": {
+    "fabricloader": ">=${loader_version}",
+    "minecraft": ">=${minecraft_version}",
+    "java": ">=${java_version}",
+    "fabric-api": "*"
+  },
+  "suggests": {}
+}
