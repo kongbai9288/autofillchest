@@ -1,0 +1,231 @@
+MCJAR=/home/runner/.gradle/caches/fabric-loom/minecraftMaven/net/minecraft/minecraft-merged-deobf/26.2/minecraft-merged-deobf-26.2.jar
+=========== MultiPlayerGameMode 全部方法 ===========
+Compiled from "MultiPlayerGameMode.java"
+public class net.minecraft.client.multiplayer.MultiPlayerGameMode {
+  private static final org.slf4j.Logger LOGGER;
+  private final net.minecraft.client.Minecraft minecraft;
+  private final net.minecraft.client.multiplayer.ClientPacketListener connection;
+  private net.minecraft.core.BlockPos destroyBlockPos;
+  private net.minecraft.world.item.ItemStack destroyingItem;
+  private float destroyProgress;
+  private float destroyTicks;
+  private int destroyDelay;
+  private boolean isDestroying;
+  private net.minecraft.world.level.GameType localPlayerMode;
+  private net.minecraft.world.level.GameType previousLocalPlayerMode;
+  private int carriedIndex;
+  public net.minecraft.client.multiplayer.MultiPlayerGameMode(net.minecraft.client.Minecraft, net.minecraft.client.multiplayer.ClientPacketListener);
+  public void adjustPlayer(net.minecraft.world.entity.player.Player);
+  public void setLocalMode(net.minecraft.world.level.GameType, net.minecraft.world.level.GameType);
+  public void setLocalMode(net.minecraft.world.level.GameType);
+  public boolean canHurtPlayer();
+  public boolean destroyBlock(net.minecraft.core.BlockPos);
+  public boolean startDestroyBlock(net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  public void stopDestroyBlock();
+  public boolean continueDestroyBlock(net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  private void startPrediction(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.client.multiplayer.prediction.PredictiveAction);
+  public void tick();
+  private boolean sameDestroyTarget(net.minecraft.core.BlockPos);
+  private void ensureHasSentCarriedItem();
+  public net.minecraft.world.InteractionResult useItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+  private net.minecraft.world.InteractionResult performUseItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+  public net.minecraft.world.InteractionResult useItem(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+  public net.minecraft.client.player.LocalPlayer createPlayer(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.stats.StatsCounter, net.minecraft.client.ClientRecipeBook);
+  public net.minecraft.client.player.LocalPlayer createPlayer(net.minecraft.client.multiplayer.ClientLevel, net.minecraft.stats.StatsCounter, net.minecraft.client.ClientRecipeBook, net.minecraft.world.entity.player.Input, boolean);
+  public void attack(net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity);
+  public void spectate(net.minecraft.world.entity.Entity);
+  public void spectatorNoAction();
+  public net.minecraft.world.InteractionResult interact(net.minecraft.world.entity.player.Player, net.minecraft.world.entity.Entity, net.minecraft.world.phys.EntityHitResult, net.minecraft.world.InteractionHand);
+  public void handleContainerInput(int, int, int, net.minecraft.world.inventory.ContainerInput, net.minecraft.world.entity.player.Player);
+  public void handlePlaceRecipe(int, net.minecraft.world.item.crafting.display.RecipeDisplayId, boolean);
+  public void handleInventoryButtonClick(int, int);
+  public void handleCreativeModeItemAdd(net.minecraft.world.item.ItemStack, int);
+  public void handleCreativeModeItemDrop(net.minecraft.world.item.ItemStack);
+  public void releaseUsingItem(net.minecraft.world.entity.player.Player);
+  public void piercingAttack(net.minecraft.world.item.component.PiercingWeapon);
+  public boolean hasExperience();
+  public boolean hasMissTime();
+  public boolean isServerControlledInventory();
+  public boolean isSpectator();
+  public net.minecraft.world.level.GameType getPreviousPlayerMode();
+  public net.minecraft.world.level.GameType getPlayerMode();
+  public boolean isDestroying();
+  public int getDestroyStage();
+  public void handlePickItemFromBlock(net.minecraft.core.BlockPos, boolean);
+  public void handlePickItemFromEntity(net.minecraft.world.entity.Entity, boolean);
+  public void handleSlotStateChanged(int, int, boolean);
+  private net.minecraft.network.protocol.Packet lambda$useItem$0(net.minecraft.world.InteractionHand, net.minecraft.world.entity.player.Player, org.apache.commons.lang3.mutable.MutableObject, int);
+  private static net.minecraft.world.item.ItemStack lambda$useItem$1(net.minecraft.world.entity.player.Player, net.minecraft.world.InteractionHand);
+  private net.minecraft.network.protocol.Packet lambda$useItemOn$0(org.apache.commons.lang3.mutable.MutableObject, net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult, int);
+  private net.minecraft.network.protocol.Packet lambda$continueDestroyBlock$1(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$continueDestroyBlock$0(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$startDestroyBlock$1(net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  private net.minecraft.network.protocol.Packet lambda$startDestroyBlock$0(net.minecraft.core.BlockPos, net.minecraft.core.Direction, int);
+  static {};
+}
+=========== useItemOn 字节码 ===========
+  public net.minecraft.world.InteractionResult useItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+    Code:
+         0: aload_0
+         1: invokevirtual #331                // Method ensureHasSentCarriedItem:()V
+         4: aload_0
+         5: getfield      #89                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+         8: getfield      #134                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        11: invokevirtual #222                // Method net/minecraft/client/multiplayer/ClientLevel.getWorldBorder:()Lnet/minecraft/world/level/border/WorldBorder;
+        14: aload_3
+        15: invokevirtual #498                // Method net/minecraft/world/phys/BlockHitResult.getBlockPos:()Lnet/minecraft/core/BlockPos;
+        18: invokevirtual #227                // Method net/minecraft/world/level/border/WorldBorder.isWithinBounds:(Lnet/minecraft/core/BlockPos;)Z
+        21: ifne          28
+        24: getstatic     #502                // Field net/minecraft/world/InteractionResult.FAIL:Lnet/minecraft/world/InteractionResult$Fail;
+        27: areturn
+        28: new           #504                // class org/apache/commons/lang3/mutable/MutableObject
+        31: dup
+        32: invokespecial #505                // Method org/apache/commons/lang3/mutable/MutableObject."<init>":()V
+        35: astore        4
+        37: aload_0
+        38: aload_0
+        39: getfield      #89                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        42: getfield      #134                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        45: aload_0
+        46: aload         4
+        48: aload_1
+        49: aload_2
+        50: aload_3
+        51: invokedynamic #513,  0            // InvokeDynamic #4:predict:(Lnet/minecraft/client/multiplayer/MultiPlayerGameMode;Lorg/apache/commons/lang3/mutable/MutableObject;Lnet/minecraft/client/player/LocalPlayer;Lnet/minecraft/world/InteractionHand;Lnet/minecraft/world/phys/BlockHitResult;)Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;
+        56: invokevirtual #271                // Method startPrediction:(Lnet/minecraft/client/multiplayer/ClientLevel;Lnet/minecraft/client/multiplayer/prediction/PredictiveAction;)V
+        59: aload         4
+        61: invokevirtual #517                // Method org/apache/commons/lang3/mutable/MutableObject.get:()Ljava/lang/Object;
+        64: checkcast     #19                 // class net/minecraft/world/InteractionResult
+        67: areturn
+
+  private net.minecraft.world.InteractionResult performUseItemOn(net.minecraft.client.player.LocalPlayer, net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult);
+    Code:
+         0: aload_3
+         1: invokevirtual #498                // Method net/minecraft/world/phys/BlockHitResult.getBlockPos:()Lnet/minecraft/core/BlockPos;
+         4: astore        4
+         6: aload_1
+         7: aload_2
+         8: invokevirtual #527                // Method net/minecraft/client/player/LocalPlayer.getItemInHand:(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;
+        11: astore        5
+        13: aload_0
+        14: getfield      #87                 // Field localPlayerMode:Lnet/minecraft/world/level/GameType;
+        17: getstatic     #530                // Field net/minecraft/world/level/GameType.SPECTATOR:Lnet/minecraft/world/level/GameType;
+        20: if_acmpne     27
+        23: getstatic     #534                // Field net/minecraft/world/InteractionResult.CONSUME:Lnet/minecraft/world/InteractionResult$Success;
+        26: areturn
+        27: aload_1
+        28: invokevirtual #148                // Method net/minecraft/client/player/LocalPlayer.getMainHandItem:()Lnet/minecraft/world/item/ItemStack;
+        31: invokevirtual #537                // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+        34: ifeq          47
+        37: aload_1
+        38: invokevirtual #540                // Method net/minecraft/client/player/LocalPlayer.getOffhandItem:()Lnet/minecraft/world/item/ItemStack;
+        41: invokevirtual #537                // Method net/minecraft/world/item/ItemStack.isEmpty:()Z
+        44: ifne          51
+        47: iconst_1
+        48: goto          52
+        51: iconst_0
+        52: istore        6
+        54: aload_1
+        55: invokevirtual #543                // Method net/minecraft/client/player/LocalPlayer.isSecondaryUseActive:()Z
+        58: ifeq          70
+        61: iload         6
+        63: ifeq          70
+        66: iconst_1
+        67: goto          71
+        70: iconst_0
+        71: istore        7
+        73: iload         7
+        75: ifne          193
+        78: aload_0
+        79: getfield      #89                 // Field minecraft:Lnet/minecraft/client/Minecraft;
+        82: getfield      #134                // Field net/minecraft/client/Minecraft.level:Lnet/minecraft/client/multiplayer/ClientLevel;
+        85: aload         4
+        87: invokevirtual #233                // Method net/minecraft/client/multiplayer/ClientLevel.getBlockState:(Lnet/minecraft/core/BlockPos;)Lnet/minecraft/world/level/block/state/BlockState;
+        90: astore        8
+        92: aload_0
+        93: getfield      #91                 // Field connection:Lnet/minecraft/client/multiplayer/ClientPacketListener;
+        96: aload         8
+        98: invokevirtual #158                // Method net/minecraft/world/level/block/state/BlockState.getBlock:()Lnet/minecraft/world/level/block/Block;
+       101: invokevirtual #547                // Method net/minecraft/world/level/block/Block.requiredFeatures:()Lnet/minecraft/world/flag/FeatureFlagSet;
+       104: invokevirtual #551                // Method net/minecraft/client/multiplayer/ClientPacketListener.isFeatureEnabled:(Lnet/minecraft/world/flag/FeatureFlagSet;)Z
+       107: ifne          114
+       110: getstatic     #502                // Field net/minecraft/world/InteractionResult.FAIL:Lnet/minecraft/world/InteractionResult$Fail;
+       113: areturn
+       114: aload         8
+       116: aload_1
+       117: aload_2
+       118: invokevirtual #527                // Method net/minecraft/client/player/LocalPlayer.getItemInHand:(Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;
+=========== ServerboundUseItemOnPacket ===========
+Compiled from "ServerboundUseItemOnPacket.java"
+public class net.minecraft.network.protocol.game.ServerboundUseItemOnPacket implements net.minecraft.network.protocol.Packet<net.minecraft.network.protocol.game.ServerGamePacketListener> {
+  public static final net.minecraft.network.codec.StreamCodec<net.minecraft.network.FriendlyByteBuf, net.minecraft.network.protocol.game.ServerboundUseItemOnPacket> STREAM_CODEC;
+  private final net.minecraft.world.phys.BlockHitResult blockHit;
+  private final net.minecraft.world.InteractionHand hand;
+  private final int sequence;
+  public net.minecraft.network.protocol.game.ServerboundUseItemOnPacket(net.minecraft.world.InteractionHand, net.minecraft.world.phys.BlockHitResult, int);
+  private net.minecraft.network.protocol.game.ServerboundUseItemOnPacket(net.minecraft.network.FriendlyByteBuf);
+  private void write(net.minecraft.network.FriendlyByteBuf);
+  public net.minecraft.network.protocol.PacketType<net.minecraft.network.protocol.game.ServerboundUseItemOnPacket> type();
+  public void handle(net.minecraft.network.protocol.game.ServerGamePacketListener);
+  public net.minecraft.world.InteractionHand getHand();
+  public net.minecraft.world.phys.BlockHitResult getHitResult();
+  public int getSequence();
+  public void handle(net.minecraft.network.PacketListener);
+  static {};
+}
+=========== ChestBlock ===========
+Compiled from "ChestBlock.java"
+public class net.minecraft.world.level.block.ChestBlock extends net.minecraft.world.level.block.AbstractChestBlock<net.minecraft.world.level.block.entity.ChestBlockEntity> implements net.minecraft.world.level.block.SimpleWaterloggedBlock {
+  public static final com.mojang.serialization.MapCodec<net.minecraft.world.level.block.ChestBlock> CODEC;
+  public static final net.minecraft.world.level.block.state.properties.EnumProperty<net.minecraft.core.Direction> FACING;
+  public static final net.minecraft.world.level.block.state.properties.EnumProperty<net.minecraft.world.level.block.state.properties.ChestType> TYPE;
+  public static final net.minecraft.world.level.block.state.properties.BooleanProperty WATERLOGGED;
+  public static final int EVENT_SET_OPEN_COUNT;
+  private final net.minecraft.sounds.SoundEvent openSound;
+  private static final net.minecraft.world.level.block.DoubleBlockCombiner$Combiner<net.minecraft.world.level.block.entity.ChestBlockEntity, java.util.Optional<net.minecraft.world.Container>> CHEST_COMBINER;
+  private static final net.minecraft.world.level.block.DoubleBlockCombiner$Combiner<net.minecraft.world.level.block.entity.ChestBlockEntity, java.util.Optional<net.minecraft.world.MenuProvider>> MENU_PROVIDER_COMBINER;
+  public com.mojang.serialization.MapCodec<? extends net.minecraft.world.level.block.ChestBlock> codec();
+  protected net.minecraft.world.level.block.ChestBlock(java.util.function.Supplier<net.minecraft.world.level.block.entity.BlockEntityType<? extends net.minecraft.world.level.block.entity.ChestBlockEntity>>, net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent, net.minecraft.world.level.block.state.BlockBehaviour$Properties);
+  public static net.minecraft.world.level.block.DoubleBlockCombiner$BlockType getBlockType(net.minecraft.world.level.block.state.BlockState);
+  protected net.minecraft.world.level.block.state.BlockState updateShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.LevelReader, net.minecraft.world.level.ScheduledTickAccess, net.minecraft.core.BlockPos, net.minecraft.core.Direction, net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState, net.minecraft.util.RandomSource);
+  public boolean chestCanConnectTo(net.minecraft.world.level.block.state.BlockState);
+  protected net.minecraft.world.phys.shapes.VoxelShape getShape(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos, net.minecraft.world.phys.shapes.CollisionContext);
+  public static net.minecraft.core.Direction getConnectedDirection(net.minecraft.world.level.block.state.BlockState);
+  public static net.minecraft.core.BlockPos getConnectedBlockPos(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  public net.minecraft.world.level.block.state.BlockState getStateForPlacement(net.minecraft.world.item.context.BlockPlaceContext);
+  protected net.minecraft.world.level.block.state.properties.ChestType getChestType(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  protected net.minecraft.world.level.material.FluidState getFluidState(net.minecraft.world.level.block.state.BlockState);
+  private net.minecraft.core.Direction candidatePartnerFacing(net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  protected void affectNeighborsAfterRemoval(net.minecraft.world.level.block.state.BlockState, net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, boolean);
+  protected net.minecraft.world.InteractionResult useWithoutItem(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.world.entity.player.Player, net.minecraft.world.phys.BlockHitResult);
+  protected net.minecraft.stats.Stat<net.minecraft.resources.Identifier> getOpenChestStat();
+  public net.minecraft.world.level.block.entity.BlockEntityType<? extends net.minecraft.world.level.block.entity.ChestBlockEntity> blockEntityType();
+  public static net.minecraft.world.Container getContainer(net.minecraft.world.level.block.ChestBlock, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, boolean);
+  public net.minecraft.world.level.block.DoubleBlockCombiner$NeighborCombineResult<? extends net.minecraft.world.level.block.entity.ChestBlockEntity> combine(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, boolean);
+  protected net.minecraft.world.MenuProvider getMenuProvider(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos);
+  public static net.minecraft.world.level.block.DoubleBlockCombiner$Combiner<net.minecraft.world.level.block.entity.ChestBlockEntity, it.unimi.dsi.fastutil.floats.Float2FloatFunction> opennessCombiner(net.minecraft.world.level.block.entity.LidBlockEntity);
+  public net.minecraft.world.level.block.entity.BlockEntity newBlockEntity(net.minecraft.core.BlockPos, net.minecraft.world.level.block.state.BlockState);
+  public <T extends net.minecraft.world.level.block.entity.BlockEntity> net.minecraft.world.level.block.entity.BlockEntityTicker<T> getTicker(net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.entity.BlockEntityType<T>);
+  public static boolean isChestBlockedAt(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos);
+  private static boolean isBlockedChestByBlock(net.minecraft.world.level.BlockGetter, net.minecraft.core.BlockPos);
+  private static boolean isCatSittingOnChest(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos);
+  protected boolean hasAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState);
+  protected int getAnalogOutputSignal(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.Level, net.minecraft.core.BlockPos, net.minecraft.core.Direction);
+  protected net.minecraft.world.level.block.state.BlockState rotate(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Rotation);
+  protected net.minecraft.world.level.block.state.BlockState mirror(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.block.Mirror);
+  protected void createBlockStateDefinition(net.minecraft.world.level.block.state.StateDefinition$Builder<net.minecraft.world.level.block.Block, net.minecraft.world.level.block.state.BlockState>);
+  protected boolean isPathfindable(net.minecraft.world.level.block.state.BlockState, net.minecraft.world.level.pathfinder.PathComputationType);
+  protected void tick(net.minecraft.world.level.block.state.BlockState, net.minecraft.server.level.ServerLevel, net.minecraft.core.BlockPos, net.minecraft.util.RandomSource);
+  public net.minecraft.sounds.SoundEvent getOpenChestSound();
+  private static boolean lambda$combine$0(net.minecraft.world.level.LevelAccessor, net.minecraft.core.BlockPos);
+  private static net.minecraft.world.level.block.ChestBlock lambda$static$1(net.minecraft.sounds.SoundEvent, net.minecraft.sounds.SoundEvent, net.minecraft.world.level.block.state.BlockBehaviour$Properties);
+  private static net.minecraft.world.level.block.entity.BlockEntityType lambda$static$2();
+=========== LocalPlayer ===========
+  public final net.minecraft.client.multiplayer.ClientPacketListener connection;
+  public void swing(net.minecraft.world.InteractionHand);
+=========== ClientPacketListener send ===========
+  public void sendChat(java.lang.String);
+  public void sendCommand(java.lang.String);
+  public void sendUnattendedCommand(java.lang.String, net.minecraft.client.gui.screens.Screen);
+=========== Entity.pick ===========
+  public net.minecraft.world.phys.HitResult pick(double, float, boolean);
