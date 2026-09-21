@@ -1,5 +1,7 @@
 # Auto Fill Chest（Minecraft 26.2 / Fabric）
 
+**许可证：LGPL-3.0-only**（与参考项目 ImmersiveMC 一致）｜参考：https://github.com/hammy275/immersive-mc
+
 按 **H** 键，把背包里的物品自动塞进准星指向的箱子，直到箱子被占满。
 填充方向固定为 **玩家背包 → 箱子**（不是把箱子搬进背包）。
 
@@ -97,6 +99,33 @@ CI（`.github/workflows/build.yml`，push 到 main 或手动触发）会自动�
 gradle build          # 产物：build/libs/autofillchest-mc26.2-1.0.0.jar
 ```
 
-## 八、许可
+## 八、许可证与归属
 
-MIT
+**许可证：GNU Lesser General Public License v3.0（LGPL-3.0-only）**
+
+- `LICENSE.txt` —— 本项目的许可证声明
+- `COPYING.txt` —— GNU General Public License v3.0 全文（LGPL-3.0 以 GPL-3.0 为基础）
+- `COPYING.LESSER.txt` —— GNU Lesser General Public License v3.0 附加条款全文
+
+### 参考项目署名（必须保留）
+
+| 项目 | 作者 | 主页 | 许可证 |
+|---|---|---|---|
+| ImmersiveMC | hammy275 | https://github.com/hammy275/immersive-mc | LGPL-3.0 |
+
+本模组在开发过程中参考了 **ImmersiveMC**，其容器交互与物品移动的实现思路对本项目
+有参考价值。依据 LGPL-3.0 的署名要求，此处予以明确标注；**本项目沿用与 ImmersiveMC
+相同的许可证（LGPL-3.0-only）**。
+
+完整的归属声明见仓库根目录 [`CREDITS.txt`](CREDITS.txt)。
+
+### 图标
+
+`assets/autofillchest/icon.png` 由项目作者 **kongbai9288** 本人提供，
+**非 AI 生成**，未经许可不得单独使用。
+
+### 第三方依赖
+
+- Minecraft（Mojang / Microsoft）：商业授权，遵循其 EULA，本体由 Loom 构建时从官方拉取
+- Fabric Loader / Fabric API（FabricMC）：Apache-2.0
+
