@@ -10,12 +10,12 @@ public final class AutoFillConfig {
 
     /**
      * 填充阶段的安全上限（tick），超时自动结束，防止状态机卡死。
-     * 30 秒足够把 36 个背包槽都点一遍（一 tick 一包）。
+     * 占格模式下一格需要 3 tick，54 格约 162 tick，这里留足余量。
      */
-    public static final int MAX_FILL_TICKS = 600;
+    public static final int MAX_FILL_TICKS = 1200;
 
-    /** 发出"打开箱子"后，等待界面出现的上限（tick）。移动端给足 3 秒。 */
-    public static final int OPEN_TIMEOUT_TICKS = 60;
+    /** 发出"打开箱子"后，等待界面出现的上限（tick）。移动端 TPS 偏低，给足 5 秒。 */
+    public static final int OPEN_TIMEOUT_TICKS = 100;
 
     /** 填充完成后是否自动关闭箱子界面。 */
     public static final boolean AUTO_CLOSE_AFTER_FILL = false;

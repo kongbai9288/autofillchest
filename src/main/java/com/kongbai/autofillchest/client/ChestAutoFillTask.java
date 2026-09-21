@@ -1,25 +1,26 @@
 /**
  * 填充任务状态机（核心逻辑）。
  *
- * 流程：
- *   IDLE
- *    ├─ 容器界面已打开 -> 直接 FILLING（主路径，最可靠）
- *    ├─ 准星找到箱子   -> 尝试自动开箱 -> WAITING_OPEN
- *    └─ 都没有         -> 提示"没有对准箱子"
- *   WAITING_OPEN -> 等界面出现 -> FILLING（超时提示"请手动打开箱子后再按 H"）
- *   FILLING      -> 每 tick 发一个 QUICK_MOVE，直到箱子满 / 背包空 / 超时
+ * 【填充语义】这里做的是"占格子"，不是"搬物品"：
+ *   背包 -> 箱子，每次只往箱子的一个空格里放 1 个物品。
+ *   放完把背包里剩余的物品放回去，再拿下一堆放 1 个到下一个空格。
+ *   如此循环，直到箱子没有空格（27 / 54 格全部被占用）或背包物品用完。
  *
- * 为什么用 QUICK_MOVE 而不是自己搬 ItemStack：
- *   客户端直接改方块实体 Inventory 只在单人下有效，联机会立刻 desync 并被服务端覆盖。
- *   QUICK_MOVE 就是 vanilla 的"shift + 左键"包，服务端权威执行，
- *   内置顺序恰好是"先补满同种未满堆叠 -> 再占用空格子"，与需求等价。
+ *   这样箱子的每一格都会被占上（每格 1 个），而不是把整堆物品塞进少数几格。
  *
- * 【重要】每 tick 只发一个点击包。
+ * 【为什么一 tick 只发一个包】
  *   ServerboundContainerClickPacket 带 stateId，同一 tick 内连发多个包时 stateId 不变，
- *   服务端只会接受第一个、丢弃其余，导致大量槽位被跳过（表现就是"箱子填不满"）。
- *   所以这里严格一 tick 一包，宁可慢一点也要保证每个包都被执行。
+ *   服务端只接受第一个、丢弃其余。所以严格一 tick 一包，保证每个包都被执行。
  *
- * 箱子容量：单箱 27 格，相连大箱 54 格；界面打开后按 slots 数量算，不写死。
+ * 【三步循环】每占一格需要 3 个包（3 tick）：
+ *   TAKE  : 左键点背包槽，把整堆拿到手上
+ *   PLACE : 右键点箱子空格，放下 1 个（占一格）
+ *   RETURN: 左键点背包原槽，把剩余的放回去
+ *
+ * 状态流转：
+ *   IDLE ─┬─ 容器界面已打开 -> FILLING（主路径，最可靠）
+ *         ├─ 准星找到箱子   -> 自动开箱 -> WAITING_OPEN
+ *         └─ 都没有         -> 提示"没有对准箱子"
  */
 package com.kongbai.autofillchest.client;
 
@@ -28,12 +29,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.InteractionResult;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.ChestBlock;
-import net.minecraft.world.phys.BlockHitResult;
 
 import java.util.List;
 
@@ -47,29 +46,35 @@ public final class ChestAutoFillTask {
     /** 玩家自己背包界面（InventoryMenu）的槽位数，用来判断"有没有打开容器"。 */
     private static final int PLAYER_INVENTORY_MENU_SLOTS = 46;
 
-    /** 连续这么多 tick 找不到可移动的物品，认为背包已经空了。 */
-    private static final int IDLE_TICKS_TO_FINISH = 20;
-
     private enum State {
         IDLE,
         WAITING_OPEN,
         FILLING
     }
 
+    /** 占格循环的三个步骤。 */
+    private enum Step {
+        TAKE,
+        PLACE,
+        RETURN
+    }
+
     private enum FinishReason {
         CHEST_FULL,
         INVENTORY_EMPTY,
-        NO_MORE_MOVES,
         TIMEOUT
     }
 
     private State state = State.IDLE;
+    private Step step = Step.TAKE;
+    private FinishReason pendingFinish;
+
     private BlockPos targetPos;
     private int ticks;
-    private int cursor;
-    private int idleTicks;
+    private int invCursor;
+    private int currentSlot = -1;
     private int openRetries;
-    private int movedCount;
+    private int placedCount;
 
     private ChestAutoFillTask() {
     }
@@ -87,7 +92,6 @@ public final class ChestAutoFillTask {
         ChestTargetFinder.Target target = ChestTargetFinder.find(mc);
 
         // 主路径：容器界面已经开着（玩家自己右键打开的），直接填它。
-        // 这样即使准星此刻没指到方块（打开界面后 hitResult 常常失效），也能正常填充。
         if (isContainerOpen(mc)) {
             targetPos = target != null ? target.getPos() : null;
             AutoFillChest.LOGGER.info("[AutoFillChest] 界面已打开，直接填充，槽位数={}",
@@ -121,7 +125,7 @@ public final class ChestAutoFillTask {
                 return;
             }
             // 中途补一次右键：移动端 / 低 TPS 下第一次可能来不及生效
-            if (ticks == 30 && openRetries < 1) {
+            if (ticks == 40 && openRetries < 1) {
                 openRetries++;
                 ChestTargetFinder.Target again = ChestTargetFinder.find(mc);
                 if (again != null) {
@@ -136,15 +140,10 @@ public final class ChestAutoFillTask {
             return;
         }
 
-        // ---- FILLING ----
+        // ---- FILLING：一 tick 一个包 ----
         LocalPlayer player = mc.player;
         if (player == null || !isContainerOpen(mc)) {
             reset(); // 界面被关掉了
-            return;
-        }
-
-        if (isChestFull(mc)) {
-            finish(mc, FinishReason.CHEST_FULL);
             return;
         }
 
@@ -154,29 +153,49 @@ public final class ChestAutoFillTask {
             reset();
             return;
         }
+        int chestSlots = playerSlotStart;
 
-        // 一 tick 只点一个槽，从 cursor 开始轮转找下一个非空背包槽
-        boolean clicked = false;
-        for (int i = 0; i < PLAYER_SLOT_COUNT; i++) {
-            int offset = (cursor + i) % PLAYER_SLOT_COUNT;
-            int index = playerSlotStart + offset;
-            Slot slot = slots.get(index);
-            if (slot.hasItem()) {
-                ContainerClickHelper.quickMove(mc, index);
-                cursor = (offset + 1) % PLAYER_SLOT_COUNT;
-                movedCount++;
-                clicked = true;
+        switch (step) {
+            case TAKE: {
+                // 上一轮标记了结束原因（比如箱子没空格了），先把物品归位再收尾
+                if (pendingFinish != null) {
+                    finish(mc, pendingFinish);
+                    return;
+                }
+                int idx = findNonEmptyInvSlot(slots, playerSlotStart, invCursor);
+                if (idx < 0) {
+                    finish(mc, FinishReason.INVENTORY_EMPTY);
+                    return;
+                }
+                ContainerClickHelper.click(mc, idx, 0); // 左键：拿起整堆
+                currentSlot = idx;
+                invCursor = (idx - playerSlotStart + 1) % PLAYER_SLOT_COUNT;
+                step = Step.PLACE;
                 break;
             }
-        }
-
-        if (clicked) {
-            idleTicks = 0;
-        } else {
-            idleTicks++;
-            if (idleTicks >= IDLE_TICKS_TO_FINISH) {
-                finish(mc, movedCount > 0 ? FinishReason.INVENTORY_EMPTY : FinishReason.NO_MORE_MOVES);
-                return;
+            case PLACE: {
+                int empty = findEmptyChestSlot(slots, chestSlots);
+                if (empty < 0) {
+                    // 箱子没有空格了：把手上的东西放回去，下一 tick 收尾
+                    pendingFinish = FinishReason.CHEST_FULL;
+                    if (currentSlot >= 0) {
+                        ContainerClickHelper.click(mc, currentSlot, 0);
+                    }
+                    step = Step.TAKE;
+                    break;
+                }
+                ContainerClickHelper.click(mc, empty, 1); // 右键：放 1 个，占一格
+                placedCount++;
+                step = Step.RETURN;
+                break;
+            }
+            default: { // RETURN
+                if (currentSlot >= 0) {
+                    ContainerClickHelper.click(mc, currentSlot, 0); // 左键：剩余放回去
+                }
+                currentSlot = -1;
+                step = Step.TAKE;
+                break;
             }
         }
 
@@ -191,10 +210,12 @@ public final class ChestAutoFillTask {
 
     private void startFilling(Minecraft mc) {
         state = State.FILLING;
+        step = Step.TAKE;
+        pendingFinish = null;
         ticks = 0;
-        cursor = 0;
-        idleTicks = 0;
-        movedCount = 0;
+        invCursor = 0;
+        currentSlot = -1;
+        placedCount = 0;
         Feedback.send(mc, "message.autofillchest.started");
     }
 
@@ -211,7 +232,11 @@ public final class ChestAutoFillTask {
                 && player.containerMenu.slots.size() > PLAYER_INVENTORY_MENU_SLOTS;
     }
 
-    /** 尝试右键打开箱子。优先走标准 gameMode，失败再直接发包兜底。 */
+    /**
+     * 右键开箱。
+     * 注意：InteractionResult.Pass 是正常结果（动作交给方块 / 服务端处理，箱子随后被打开），
+     * 不要对它做兜底重发——重复发右键包会把刚打开的界面又关掉。
+     */
     private void tryOpenChest(Minecraft mc, ChestTargetFinder.Target target) {
         InteractionHand hand = pickSafeHand(mc);
         if (hand == null) {
@@ -222,11 +247,7 @@ public final class ChestAutoFillTask {
             }
             hand = InteractionHand.MAIN_HAND;
         }
-        InteractionResult result = ContainerClickHelper.useItemOn(mc, hand, target.getHit());
-        if (result == null || !result.consumesAction()) {
-            // 标准路径没反应，直接补一个右键包
-            ContainerClickHelper.sendUseItemOn(mc, hand, target.getHit());
-        }
+        ContainerClickHelper.useItemOn(mc, hand, target.getHit());
     }
 
     /** 选一只手来右键：优先空手；两只手都有东西时，只要不是方块也能开箱。 */
@@ -250,17 +271,28 @@ public final class ChestAutoFillTask {
         return null;
     }
 
-    /** 箱子的格子是否全部被占满（有物品且达到该物品最大堆叠）。 */
-    private boolean isChestFull(Minecraft mc) {
-        List<Slot> slots = mc.player.containerMenu.slots;
-        int chestSlots = slots.size() - PLAYER_SLOT_COUNT;
-        for (int i = 0; i < chestSlots; i++) {
-            ItemStack stack = slots.get(i).getItem();
-            if (stack.isEmpty() || stack.getCount() < stack.getMaxStackSize()) {
-                return false;
+    /** 从 start 开始轮转找下一个非空的背包槽，找不到返回 -1。 */
+    private int findNonEmptyInvSlot(List<Slot> slots, int playerSlotStart, int start) {
+        for (int i = 0; i < PLAYER_SLOT_COUNT; i++) {
+            int offset = (start + i) % PLAYER_SLOT_COUNT;
+            int index = playerSlotStart + offset;
+            Slot slot = slots.get(index);
+            if (slot.hasItem()) {
+                return index;
             }
         }
-        return true;
+        return -1;
+    }
+
+    /** 找箱子的第一个空格，找不到返回 -1。 */
+    private int findEmptyChestSlot(List<Slot> slots, int chestSlots) {
+        for (int i = 0; i < chestSlots; i++) {
+            ItemStack stack = slots.get(i).getItem();
+            if (stack.isEmpty()) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     /** 统计箱子已占用格数，用于提示。返回 {已占用, 总格数}。 */
@@ -297,19 +329,21 @@ public final class ChestAutoFillTask {
             ContainerClickHelper.closeScreen(mc);
         }
 
-        AutoFillChest.LOGGER.info("[AutoFillChest] 填充结束 {}：箱子 {}/{} 格，共点击 {} 次",
-                reason, used, total, movedCount);
+        AutoFillChest.LOGGER.info("[AutoFillChest] 填充结束 {}：箱子 {}/{} 格，共占 {} 格",
+                reason, used, total, placedCount);
         reset();
     }
 
     private void reset() {
         state = State.IDLE;
+        step = Step.TAKE;
+        pendingFinish = null;
         targetPos = null;
         ticks = 0;
-        cursor = 0;
-        idleTicks = 0;
+        invCursor = 0;
+        currentSlot = -1;
         openRetries = 0;
-        movedCount = 0;
+        placedCount = 0;
     }
 
     /** 当前目标坐标（调试用）。 */
