@@ -3,10 +3,17 @@
   "id": "autofillchest",
   "version": "${version}",
   "name": "Auto Fill Chest",
-  "description": "按 H 键，把背包里的物品一键塞满你正在看的箱子（纯客户端，服务端无需安装）",
+  "description": "按 H 键，把背包里的物品一键塞满你正在看的箱子（纯客户端，服务端无需安装）。许可证 LGPL-3.0-only，参考项目：ImmersiveMC (https://github.com/hammy275/immersive-mc)",
   "authors": ["kongbai9288"],
+  "contributors": [
+    "图标：kongbai9288（非 AI 生成）"
+  ],
+  "credits": {
+    "immersivemc": "参考项目 ImmersiveMC (https://github.com/hammy275/immersive-mc)，作者 hammy275，LGPL-3.0。本模组沿用同一许可证。"
+  },
   "contact": {},
-  "license": "MIT",
+  "license": "LGPL-3.0-only",
+  "icon": "assets/autofillchest/icon.png",
   "environment": "client",
   "entrypoints": {
     "client": ["com.kongbai.autofillchest.client.AutoFillChestClient"]

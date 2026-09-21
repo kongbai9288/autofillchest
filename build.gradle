@@ -20,7 +20,7 @@ repositories {
 
 dependencies {
     minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    // 26.1 起不要写 mappings / yarn_mappings，写了会报 "were not built for Minecraft version 26.2"
+    // 26.1 起不要写 mappings / yarn_mappings
 
     // 26.1 起 modImplementation / modCompileOnly -> implementation / compileOnly
     implementation "net.fabricmc:fabric-loader:${project.loader_version}"
@@ -41,7 +41,6 @@ processResources {
 java {
     sourceCompatibility = JavaVersion.VERSION_25
     targetCompatibility = JavaVersion.VERSION_25
-    // 26.1 起不要 withSourcesJar()：无 intermediary，remapSourcesJar 无法工作
 }
 
 tasks.withType(JavaCompile).configureEach {
@@ -49,7 +48,10 @@ tasks.withType(JavaCompile).configureEach {
     it.options.encoding = "UTF-8"
 }
 
-// 26.1 起产物用 jar 任务，不再有 remapJar
+// LGPL-3.0：把许可证与归属声明一起打进 jar
 jar {
-    from("LICENSE") { rename { "${it}_${project.base.archivesName.get()}" } }
+    from("LICENSE.txt")
+    from("COPYING.txt")
+    from("COPYING.LESSER.txt")
+    from("CREDITS.txt")
 }

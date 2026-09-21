@@ -1,4 +1,16 @@
 /**
+ * Auto Fill Chest —— 按 H 键把背包物品一键塞满准星指向的箱子。
+ *
+ * SPDX-License-Identifier: LGPL-3.0-only
+ *
+ * 参考项目：ImmersiveMC —— https://github.com/hammy275/immersive-mc
+ * （作者 hammy275，LGPL-3.0 许可证）
+ * 本模组在开发过程中参考了 ImmersiveMC，其容器交互与物品移动的实现思路对本项目
+ * 有参考价值；依据 LGPL-3.0 的要求保留署名，并沿用同一许可证（LGPL-3.0-only）。
+ * 完整归属声明见仓库根目录 CREDITS.txt。
+ */
+
+/**
  * 容器操作封装：所有界面操作都通过 MultiPlayerGameMode 发 vanilla 包完成，
  * 因此服务端不需要安装本模组，也不会出现客户端 / 服务端状态不同步（desync）。
  *

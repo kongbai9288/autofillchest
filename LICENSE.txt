@@ -1,0 +1,28 @@
+Auto Fill Chest
+Copyright (C) 2026 kongbai9288
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU Lesser General Public License for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+--------------------------------------------------------------------------
+许可证：GNU Lesser General Public License v3.0（LGPL-3.0）
+--------------------------------------------------------------------------
+
+本项目的许可证与所参考的项目 hammy275/immersive-mc 保持一致（LGPL-3.0）。
+
+  - COPYING.txt        : GNU General Public License v3.0 全文
+                         （LGPL-3.0 是在 GPL-3.0 基础上附加条款，故一并附上）
+  - COPYING.LESSER.txt : GNU Lesser General Public License v3.0 附加条款全文
+  - CREDITS.txt        : 参考项目与素材归属声明
+
+SPDX-License-Identifier: LGPL-3.0-only
